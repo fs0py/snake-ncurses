@@ -40,10 +40,13 @@ int main() {
         x->display();
         wrefresh(boxwin);
         wrefresh(scorewin);
-        if (x->is_end() == true)
+        if (x->isEnd() == true)
             break;
     }
     while (x->getMov() != 'x');
+
+    // Wait user types something before exiting game
+    getch();
 
     // End ncurses
     endwin();

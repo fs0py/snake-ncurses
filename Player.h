@@ -11,11 +11,15 @@ class Player {
         void mvleft();
         void mvright();
         void display();
-        void setapple();
-        void checkapple();
+        void setApple();
+        void checkApple();
         void score();
-        void endgame();
-        bool is_end();
+        void endGame();
+        void add();
+        void collision();
+        void appleCollision();
+        void debug();
+        bool isEnd();
         int getMov();
     private:
         WINDOW *gamewin;
@@ -28,6 +32,6 @@ class Player {
         char apple;
         int apC;
         bool broken;
-        std::vector<int> snakeLong;
+        std::vector<int> tail;
 };
 #endif
