@@ -19,7 +19,9 @@ class Player {
         void collision();
         void appleCollision();
         void debug();
+        void refreshScreen();
         bool isEnd();
+        bool hasCollided();
         int getMov();
     private:
         WINDOW *gamewin;
@@ -27,11 +29,14 @@ class Player {
         int yLoc, xLoc;
         int yMax, xMax;
         int apxLoc, apyLoc;
-        char character;
         int userMovement;
-        char apple;
         int apC;
+        int tailLong;
+        char apple;
+        char character;
         bool broken;
-        std::vector<int> tail;
+        bool collided;
+        std::vector<int> xTail;
+        std::vector<int> yTail;
 };
 #endif

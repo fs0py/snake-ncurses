@@ -37,9 +37,6 @@ int main() {
 
     // Main game loop; while user doesn't press 'X', don't exit the game.
     do {
-        x->display();
-        wrefresh(boxwin);
-        wrefresh(scorewin);
         if (x->isEnd() == true)
             break;
     }
