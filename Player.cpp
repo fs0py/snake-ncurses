@@ -73,9 +73,9 @@ void Player::setApple() {
         if (apxLoc == *i && apyLoc == *j) {
             apxLoc = rand() % xMax;
             apyLoc = rand() % yMax;
-            appleCollision();
         }
 
+    appleCollision();
     mvwaddch(gamewin, apyLoc, apxLoc, apple);
 }
 
@@ -199,6 +199,10 @@ int Player::getMov() {
             mvwprintw(scorewin, 5, 2, "Press any key to exit");
             mvwprintw(scorewin, 6, 2, "You're such a good boy!");
             broken = false;
+            refreshScreen();
+            break;
+        case 'j':
+            setApple();
             refreshScreen();
             break;
     }
