@@ -10,21 +10,23 @@ Player::Player(WINDOW *win, WINDOW *scwin, int y, int x, char chara, char ap) {
 
     gamewin = win;
     scorewin = scwin;
-    keypad(gamewin, true);
 
+
+    start_color();
+    keypad(gamewin, true);
     getmaxyx(gamewin, yMax, xMax);
-    xLoc = rand() % xMax;
-    yLoc = rand() % yMax;
+
+    xLoc = rand() % xMax-1;
+    yLoc = rand() % yMax-1;
 
     character = chara;
     apple = ap;
     apC = 0;
     tailLong = 1;
     broken = false;
-    collided = true;
 
-    setApple();
     add();
+    setApple();
     display();
     refreshScreen();
 }
@@ -50,39 +52,41 @@ void Player::mvright() {
 }
 
 void Player::display() {
-
     auto yEnd = std::end(yTail);
     auto xEnd = std::end(xTail);
+
     if (tailLong > 1) {
         mvwaddch(gamewin, *(yEnd-tailLong-1), *(xEnd-tailLong-1), ' ');
         mvwaddch(gamewin, yLoc, xLoc, 'x');
     }
+
     else {
-        mvwaddch(gamewin, *(yEnd-1), *(xEnd-1), ' ');
+        mvwaddch(gamewin, *(yEnd-tailLong), *(xEnd-tailLong), ' ');
         mvwaddch(gamewin, yLoc, xLoc, 'x');
     }
+
     refreshScreen();
 }
 
 void Player::setApple() {
-    apxLoc = rand() % xMax;
-    apyLoc = rand() % yMax;
+    apxLoc = rand() % xMax-1;
+    apyLoc = rand() % yMax-1;
     
     // I guess this can be improved... Let's leave this like it actually is, by now.
-    for (auto i = std::begin(xTail), j = std::begin(yTail); i != std::end(xTail) && j != std::end(yTail); i++, j++)
-        if (apxLoc == *i && apyLoc == *j) {
-            apxLoc = rand() % xMax;
-            apyLoc = rand() % yMax;
+    // Sorry, you->name-san!!!
+    for (auto i = (std::end(xTail))-tailLong-1, j = (std::end(yTail))-tailLong-1; i != (std::end(xTail))-1 && j != (std::end(yTail))-1; i++, j++)
+        while (apxLoc == *i && apyLoc == *j) {
+            apxLoc = rand() % xMax-1;
+            apyLoc = rand() % yMax-1;
+            appleCollision();
         }
-
-    appleCollision();
     mvwaddch(gamewin, apyLoc, apxLoc, apple);
 }
 
 void Player::checkApple() {
     if (yLoc == apyLoc && xLoc == apxLoc) {
-        setApple();
         score();
+        setApple();
         refreshScreen();
     }
 }
@@ -90,16 +94,15 @@ void Player::checkApple() {
 void Player::score() {
     tailLong++;
     apC++;
-    wattron(scorewin, A_REVERSE);
+    init_pair(1, COLOR_WHITE, COLOR_MAGENTA);
+    wbkgdset(scorewin, COLOR_PAIR(1));
     mvwprintw(scorewin, 1, 2, "Apples ate: %i", apC);
-    wattroff(scorewin, A_REVERSE);
 }
 
 void Player::endGame() {
-    mvwprintw(scorewin, 4, 2, "You've lost!");
-    mvwprintw(scorewin, 5, 2, "Press any key to exit.");
+    mvwprintw(scorewin, 2, 2, "You've lost!");
+    mvwprintw(scorewin, 3, 2, "Press any key to exit.");
     broken = true;
-    collided = true;
 }
 
 void Player::add() {
@@ -108,42 +111,46 @@ void Player::add() {
 }
 
 void Player::collision() {
-    // Collision system isn't 100% precise so we'll remove a few features (bugs) on it.
-    // Just... Don't fucking trust this.
-
-    if (yLoc < 1)
+    if (yLoc < 1) {
+        yLoc = 1;
         endGame();
+    }
 
-    if (yLoc > yMax-2)
+    if (yLoc > yMax-1) {
+        yLoc = yMax-1;
         endGame();
+    }
 
-    if (xLoc < 1)
+    if (xLoc < 1) {
+        xLoc = 1;
         endGame();
+    }
 
-    if (xLoc > xMax-2)
+    if (xLoc > xMax-1) {
+        xLoc = xMax-1;
         endGame();
+    }
 
-    // 100% features!
-    // Don't even uncomment this, there's no tail vector.
-    /*
-    for (auto i = std::begin(tail); i != std::end(tail); i++)
-        if (yLoc == *(i-1) && xLoc == *(i-2))
-            endGame();
-    */
+    // I mean... Isn't like I did this monster code in purpose...
+    // I just... B-be gentle to me, you->name-san!!!
+    if (tailLong > 1)
+        for (auto i = (std::end(xTail))-tailLong-1, j = (std::end(yTail))-tailLong-1; i != (std::end(xTail))-1 && j != (std::end(yTail))-1; i++, j++)
+            if (xLoc == *i && yLoc == *j)
+                endGame();
 }
 
 void Player::appleCollision() {
     if (apyLoc < 1)
         apyLoc = 1;
 
-    if (apyLoc > yMax-2)
-        apyLoc = yMax-2;
+    if (apyLoc > yMax-1)
+        apyLoc = yMax-1;
 
     if (apxLoc < 1)
         apxLoc = 1;
 
-    if (apxLoc > xMax-2)
-        apxLoc = xMax-2;
+    if (apxLoc > xMax-1)
+        apxLoc = xMax-1;
 }
 
 void Player::debug() {
@@ -153,16 +160,12 @@ void Player::debug() {
 
 void Player::refreshScreen() {
     wrefresh(scorewin);
-    if (!collided)
+    if (!broken)
         wrefresh(gamewin);
 }
 
 bool Player::isEnd() {
     return broken;
-}
-
-bool Player::hasCollided() {
-    return collided;
 }
 
 int Player::getMov() {
@@ -171,26 +174,26 @@ int Player::getMov() {
     switch (userMovement) {
         case KEY_UP:
             mvup();
-            checkApple();
             collision();
+            checkApple();
             display();
             break;
         case KEY_DOWN:
             mvdown();
-            checkApple();
             collision();
+            checkApple();
             display();
             break;
         case KEY_RIGHT:
             mvright();
-            checkApple();
             collision();
+            checkApple();
             display();
             break;
         case KEY_LEFT:
             mvleft();
-            checkApple();
             collision();
+            checkApple();
             display();
             break;
         case 'X':
@@ -203,9 +206,8 @@ int Player::getMov() {
             break;
         case 'j':
             setApple();
+            checkApple();
             refreshScreen();
-            break;
     }
-
     return userMovement;
 }
