@@ -7,12 +7,13 @@ class Player {
     public:
         Player(WINDOW *win, WINDOW *scwin, int y, int x, char chara, char ap);
         void add();
+        void altEnd();
         void appleCollision();
         void checkApple();
         void collision();
         void display();
-        void debug();
         void endGame();
+        void intro();
         void mvup();
         void mvdown();
         void mvleft();
